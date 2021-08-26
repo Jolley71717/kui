@@ -136,7 +136,7 @@ abstract class KuiElement(private val tag: String, private val props: Props) : K
         setBasicEventListener(elem, "mousemove", props.mousemove)
 
         for ((event, handler) in props.extraEvents) {
-            setExtraEventListener(elem, event, handler)
+            setEventListener(elem, event, handler)
         }
 
         if (tag in disableableTags) {
@@ -166,7 +166,7 @@ abstract class KuiElement(private val tag: String, private val props: Props) : K
 
     protected abstract fun customizeElement(elem: Element, existing: KuiElement?)
 
-    protected fun setEventListener(event: String, elem: Element, newListener: (Event) -> Unit) {
+    protected fun setEventListener(elem: Element, event: String, newListener: (Event) -> Unit) {
         val listener = object : EventListener {
             override fun handleEvent(event: Event) {
                 // TODO support bubbling
@@ -187,21 +187,15 @@ abstract class KuiElement(private val tag: String, private val props: Props) : K
 
     private fun setBasicEventListener(elem: Element, event: String, handler: (() -> Unit)?) {
         if (handler != null) {
-            setEventListener(event, elem) { handler() }
+            setEventListener(elem, event) { handler() }
         }
     }
 
     private fun setKeyEventListener(elem: Element, event: String, handler: ((KeyboardEventArgs) -> Unit)?) {
         if (handler != null) {
-            setEventListener(event, elem) { e ->
+            setEventListener(elem, event) { e ->
                 handler(KeyboardEventArgs(e as KeyboardEvent))
             }
-        }
-    }
-
-    private fun setExtraEventListener(elem: Element, event: String, handler: ((Event) -> Unit)?) {
-        if (handler != null) {
-            setEventListener(event, elem, handler)
         }
     }
 
@@ -232,7 +226,7 @@ class InputTextKuiElement(props: Props, type: String, placeholder: String?, auto
     override fun customizeElement(elem: Element, existing: KuiElement?) {
         if (model != null) {
             (elem as HTMLInputElement).value = model.get()
-            setEventListener("input", elem) { e -> (e.target as? HTMLInputElement)?.let { model.set(it.value) } }
+            setEventListener(elem, "input") { e -> (e.target as? HTMLInputElement)?.let { model.set(it.value) } }
         }
     }
 }
@@ -255,7 +249,7 @@ class InputNumberKuiElement(
     override fun customizeElement(elem: Element, existing: KuiElement?) {
         if (model != null) {
             (elem as HTMLInputElement).value = model.get().toString()
-            setEventListener("input", elem) { e ->
+            setEventListener(elem, "input") { e ->
                 (e.target as? HTMLInputElement)?.value?.toDoubleOrNull()?.let { model.set(it) }
             }
         }
@@ -267,7 +261,7 @@ class CheckboxKuiElement(props: Props, private val model: KMutableProperty0<Bool
     override fun customizeElement(elem: Element, existing: KuiElement?) {
         if (model != null) {
             (elem as HTMLInputElement).checked = model.get()
-            setEventListener("change", elem) { e ->
+            setEventListener(elem, "change") { e ->
                 (e.target as? HTMLInputElement)?.let { model.set(it.checked) }
             }
         }
@@ -280,7 +274,7 @@ class RadioKuiElement<T>(props: Props, name: String, private val value: T, priva
         if (model != null) {
             (elem as HTMLInputElement).checked = value == model.get()
             // change is only called when radio is selected, NOT unselected
-            setEventListener("change", elem) { model.set(value) }
+            setEventListener(elem, "change") { model.set(value) }
         }
     }
 }
@@ -300,7 +294,7 @@ class SelectKuiElement<T>(props: Props, private val options: List<T> = emptyList
         if (model != null) {
             // -1 = no selection
             elem.selectedIndex = options.indexOf(model.get())
-            setEventListener("change", elem) { e ->
+            setEventListener(elem, "change") { e ->
                 (e.target as? HTMLSelectElement)?.let { model.set(options[it.selectedIndex]) }
             }
         }
@@ -312,7 +306,7 @@ class InputDateKuiElement(props: Props, private val model: KMutableProperty0<Dat
     override fun customizeElement(elem: Element, existing: KuiElement?) {
         if (model != null) {
             (elem as HTMLInputElement).value = model.get().toISODateString()
-            setEventListener("input", elem) { e ->
+            setEventListener(elem, "input") { e ->
                 (e.target as? HTMLInputElement)?.value?.toDateOrNull()?.let { model.set(it) }
             }
         }
@@ -323,7 +317,7 @@ class TextAreaKuiElement(props: Props, private val model: KMutableProperty0<Stri
     override fun customizeElement(elem: Element, existing: KuiElement?) {
         if (model != null) {
             (elem as HTMLTextAreaElement).value = model.get()
-            setEventListener("input", elem) { e -> (e.target as? HTMLTextAreaElement)?.let { model.set(it.value) } }
+            setEventListener(elem, "input") { e -> (e.target as? HTMLTextAreaElement)?.let { model.set(it.value) } }
         }
     }
 }
