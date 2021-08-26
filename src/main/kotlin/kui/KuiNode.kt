@@ -123,7 +123,7 @@ abstract class KuiElement(private val tag: String, private val props: Props) : K
             elem.setAttribute(name, value)
         }
 
-        clearEventListeners(elem, existing)
+        existing?.clearEventListeners(elem)
         setBasicEventListener(elem, "blur", props.blur)
         setBasicEventListener(elem, "click", props.click)
         setBasicEventListener(elem, "focus", props.focus)
@@ -178,13 +178,11 @@ abstract class KuiElement(private val tag: String, private val props: Props) : K
         elem.addEventListener(event, listener)
     }
 
-    private fun clearEventListeners(elem: Element, existing: KuiElement?) {
-        if (existing != null) {
-            for ((event, handler) in existing.events) {
-                elem.removeEventListener(event, handler)
-            }
-            existing.events.clear()
+    private fun clearEventListeners(elem: Element) {
+        for ((event, handler) in events) {
+            elem.removeEventListener(event, handler)
         }
+        events.clear()
     }
 
     private fun setBasicEventListener(elem: Element, event: String, handler: (() -> Unit)?) {
