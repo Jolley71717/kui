@@ -2,6 +2,7 @@ plugins {
     kotlin("js") version "1.8.20"
     id("org.jetbrains.dokka") version "1.8.10"
     `maven-publish`
+    id("com.github.juggernaut0.kui.download-firefox")
 }
 
 allprojects {
